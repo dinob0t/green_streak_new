@@ -36,7 +36,7 @@ auth = gh.login(login, password)
 #['CommitCommentEvent', 'CreateEvent', 'DeleteEvent', 'FollowEvent', 'ForkApplyEvent', 'ForkEvent', 'GistEvent', 'GollumEvent', 'IssueCommentEvent', 'IssuesEvent', 'MemberEvent', 'PublicEvent', 'PullRequestEvent', 'PullRequestReviewCommentEvent', 'PushEvent', 'ReleaseEvent', 'StatusEvent', 'TeamAddEvent', 'WatchEvent']
 
 # Valid commit types
-valid_commits = ['CommitCommentEvent', 'PushEvent' ]
+valid_commits = ['CommitCommentEvent', 'PushEvent']
 
 todays_public_count = 0
 weekly_public_count = 0
