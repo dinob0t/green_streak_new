@@ -2,6 +2,7 @@ import github3 as gh
 import time
 import datetime
 import pytz
+import getpass
 
 # Return only year/month/day
 def get_time_string(time_in):
@@ -19,7 +20,7 @@ def update_day_bins(key, count):
 
 # Get username and password
 login = raw_input('Enter login: ')
-password = raw_input('Enter password: ')
+password = getpass.getpass('Enter password: ')
 
 # Need Auth to increase rate limit to 5000 an hour
 auth = gh.login(login, password)
@@ -60,12 +61,14 @@ valid_commits = ['PushEvent', 'CommitCommentEvent']
 
 # Get today's date
 now = datetime.datetime.now(pytz.utc)
-today = get_time_string(now.isoformat())
+today = get_time_string(now.isoformat().encode('utf-8'))
 print 'Day now is (UTC): ', today
+
+user = gh.user(login)
 
 day_bins = {today:0}
 # Go through each event
-for event in auth.iter_events():
+for event in user.iter_events():
 	# If its a valid streak event
 	if event.type in valid_commits:	
 		# Only count public events
@@ -73,8 +76,8 @@ for event in auth.iter_events():
 			# Get the payload
 			payload = event.payload
 			# Get created datetime
-			cur_dt = get_time_string((event.to_json())['created_at'])
-			print event.to_json()
+			cur_dt = get_time_string(((event.to_json())['created_at']).encode('utf-8'))
+			#print event.to_json()
 			# If it's a push event
 			if event.type == valid_commits[0]:
 				# If the commit was to master
@@ -85,5 +88,9 @@ for event in auth.iter_events():
 			# If it's a comment event
 			else:
 				update_day_bins(cur_dt,1)
-
+print 'Recent activity: '
 print day_bins
+
+print ''
+print 'Number of commits today: ', day_bins[today]
+
