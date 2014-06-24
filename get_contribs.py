@@ -2,8 +2,16 @@ import github3 as gh
 import time
 import datetime
 import getpass
-from dateutil import rrule
+from dateutil import rrule, tz
 
+
+def utc_to_local(dt_in):
+	from_zone = tz.gettz('UTC')
+	#local_tz = datetime.datetime.now(tz.tzlocal()).tzinfo
+	to_zone = tz.tzlocal()	
+	dt_in = dt_in.replace(tzinfo=from_zone)
+	dt_out = dt_in.astimezone(to_zone)
+	return dt_out
 # Return only year/month/day
 def get_time_string(time_in):
 	cur_str = list(time_in)
@@ -19,7 +27,7 @@ def update_day_bins(key, count):
 
 
 def print_calender(now, prev_days):
-	now_m_delta = now - datetime.timedelta(days=prev_days)
+	now_m_delta = now - datetime.timedelta(days=prev_days-1)
 	for dt in rrule.rrule(rrule.DAILY, dtstart=now_m_delta, until=now):
 		cur_date = dt.strftime("%Y-%m-%d")
 		if cur_date in day_bins.keys():
@@ -72,8 +80,11 @@ valid_commits = ['PushEvent', 'CommitCommentEvent']
 
 # Get today's date
 now = datetime.datetime.now()
+
+print 'Time now is now: '
 today = get_time_string(now.isoformat().encode('utf-8'))
 print 'Day now is (UTC): ', today
+
 
 user = gh.user(login)
 user = auth.user()
@@ -87,8 +98,7 @@ for event in user.iter_events():
 			# Get the payload
 			payload = event.payload
 			# Get created datetime
-			cur_dt = get_time_string(((event.to_json())['created_at']).encode('utf-8'))
-			#print event.to_json()
+			cur_dt = get_time_string(utc_to_local(event.created_at).isoformat())
 			# If it's a push event
 			if event.type == valid_commits[0]:
 				# If the commit was to master
