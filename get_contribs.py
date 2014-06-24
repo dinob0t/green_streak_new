@@ -76,7 +76,7 @@ green_defs = {0: '#eee',
 #['CommitCommentEvent', 'CreateEvent', 'DeleteEvent', 'FollowEvent', 'ForkApplyEvent', 'ForkEvent', 'GistEvent', 'GollumEvent', 'IssueCommentEvent', 'IssuesEvent', 'MemberEvent', 'PublicEvent', 'PullRequestEvent', 'PullRequestReviewCommentEvent', 'PushEvent', 'ReleaseEvent', 'StatusEvent', 'TeamAddEvent', 'WatchEvent']
 
 # Valid commit types
-valid_commits = ['PushEvent', 'CommitCommentEvent']
+valid_commits = ['PushEvent', 'CreateEvent']
 
 # Get today's date
 now = datetime.datetime.now()
@@ -107,7 +107,7 @@ for event in user.iter_events():
 					update_day_bins(cur_dt,len(payload['commits']))
 					
 			# If it's a comment event
-			else:
+			elif payload['master_branch']==payload['ref']:
 				update_day_bins(cur_dt,1)
 
 
