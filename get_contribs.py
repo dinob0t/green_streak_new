@@ -1,8 +1,8 @@
 import github3 as gh
 import time
 import datetime
-import pytz
 import getpass
+from dateutil import rrule
 
 # Return only year/month/day
 def get_time_string(time_in):
@@ -18,9 +18,20 @@ def update_day_bins(key, count):
 		day_bins[key] = 1
 
 
+def print_calender(now, prev_days):
+	now_m_delta = now - datetime.timedelta(days=prev_days)
+	for dt in rrule.rrule(rrule.DAILY, dtstart=now_m_delta, until=now):
+		cur_date = dt.strftime("%Y-%m-%d")
+		if cur_date in day_bins.keys():
+			print cur_date, ': ', day_bins[cur_date]
+		else:
+			print cur_date, ': ', 0 
+
 # Get username and password
 login = raw_input('Enter login: ')
 password = getpass.getpass('Enter password: ')
+
+
 
 # Need Auth to increase rate limit to 5000 an hour
 auth = gh.login(login, password)
@@ -60,12 +71,12 @@ green_defs = {0: '#eee',
 valid_commits = ['PushEvent', 'CommitCommentEvent']
 
 # Get today's date
-now = datetime.datetime.now(pytz.utc)
+now = datetime.datetime.now()
 today = get_time_string(now.isoformat().encode('utf-8'))
 print 'Day now is (UTC): ', today
 
 user = gh.user(login)
-
+user = auth.user()
 day_bins = {today:0}
 # Go through each event
 for event in user.iter_events():
@@ -88,9 +99,10 @@ for event in user.iter_events():
 			# If it's a comment event
 			else:
 				update_day_bins(cur_dt,1)
+
+
 print 'Recent activity: '
-print day_bins
+print_calender(now, 100)
 
-print ''
-print 'Number of commits today: ', day_bins[today]
-
+print 'Auth calls remaining this hour: ', auth.ratelimit_remaining
+print 'Public calls remaining this hour: ',gh.ratelimit_remaining()
